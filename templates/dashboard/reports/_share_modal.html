@@ -1,0 +1,39 @@
+<!-- Share modal partial -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Share Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="share-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="share-to-select" class="form-label">Recipient</label>
+                <select id="share-to-select" name="to_email_select" class="form-select">
+                    <option value="">-- choose recipient --</option>
+                    <option value="__other__">Other (enter below)</option>
+                </select>
+                <div class="form-text">Select the client email or choose Other to enter a different address.</div>
+                <div class="invalid-feedback" data-field-error="to_email"></div>
+            </div>
+            <div class="mb-3" id="share-to-other-row" style="display:none;">
+                <label for="share-to" class="form-label">Recipient email</label>
+                <input type="email" class="form-control" id="share-to" name="to_email" />
+                <div class="invalid-feedback" data-field-error="to_email"></div>
+            </div>
+            <div class="mb-3">
+                <label for="share-message" class="form-label">Message</label>
+                <textarea id="share-message" name="message" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="mb-3 text-danger" data-field-error="__all__"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-app-action="share-send">Send</button>
+      </div>
+    </div>
+  </div>
+</div>

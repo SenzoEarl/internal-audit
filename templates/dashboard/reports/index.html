@@ -1,0 +1,83 @@
+{% extends 'assets/base.html' %}
+
+{% block title %}
+	    Reports Dashboard
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Reports Dashboard</h1>
+    <div class="d-flex justify-content-between mb-3">
+        <p class="mb-0">Welcome to the Reports Dashboard. Here you can find various reports and analytics.</p>
+        <div>
+            <button class="btn btn-success" data-app-action="report-create">Create Report</button>
+        </div>
+    </div>
+
+    {% if audits %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Audit #</th>
+                        <th>Project</th>
+                        <th>Client</th>
+                        <th>Type</th>
+                        <th>Score (%)</th>
+                        <th>Report #</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for audit in audits %}
+                        <tr data-audit-id="{{ audit.id }}" data-client-email="{{ audit.project.client.contact_email|default:'' }}">
+                            <td>{{ audit.audit_date }}</td>
+                            <td>{{ audit.audit_number }}</td>
+                            <td>{{ audit.project.title }}</td>
+                            <td>{{ audit.project.client.name }}</td>
+                            <td>{{ audit.get_audit_type_display }}</td>
+                            <td>{{ audit.overall_score_percentage }}</td>
+                            <td>{{ audit.report_number }}</td>
+                            <td>
+                                <a href="{% url 'audit:report-detail' audit.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                <button class="btn btn-sm btn-outline-secondary" data-app-action="report-share" data-audit-id="{{ audit.id }}">Share</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj and page_obj.has_other_pages %}
+        <nav aria-label="Reports pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <p>No reports found.</p>
+    {% endif %}
+
+    {% include 'dashboard/reports/_share_modal.html' %}
+
+{% endblock %}

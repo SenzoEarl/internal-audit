@@ -1,0 +1,78 @@
+/* =========================
+   App Namespace (CRITICAL)
+   ========================= */
+
+/*
+   Everything MUST live inside `.app`
+   This prevents conflicts with:
+   - Bootstrap (.container, .btn, etc.)
+   - Tailwind utility classes
+   - Bulma global styles
+*/
+
+.app {
+    --app-text-color: #212529;
+    --app-bg-color: #ffffff;
+    --app-accent-color: #0d6efd;
+
+    color: var(--app-text-color);
+    background-color: var(--app-bg-color);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu,
+        "Helvetica Neue", Arial, sans-serif;
+}
+
+/* =========================
+   Layout (Scoped)
+   ========================= */
+
+.app__section {
+    padding: 1rem;
+}
+
+.app__container {
+    max-width: 1140px;
+    margin-inline: auto;
+}
+
+/* =========================
+   Components (Opt-in Only)
+   ========================= */
+
+.app__card {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+.app__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+
+    background-color: var(--app-accent-color);
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+/* =========================
+   Accessibility (Scoped)
+   ========================= */
+
+.app :focus-visible {
+    outline: 3px solid var(--app-accent-color);
+    outline-offset: 2px;
+}
+
+/* =========================
+   Utilities (Namespaced)
+   ========================= */
+
+.app--hidden {
+    display: none !important;
+}

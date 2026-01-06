@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'audit:index' %}">LethuCxnsulting</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'audit:client-dashboard' %}">Clients</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'audit:report-dashboard' %}">Reports</a>
+                </li>
+            </ul>
+            <!-- Logout form; progressive enhancement: works without JS, and JS intercepts via data-app-action -->
+            <form method="post" action="{% url 'audit:logout-ajax' %}" class="d-flex" id="logout-form">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger" type="submit" id="logout-btn" data-app-action="logout">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>

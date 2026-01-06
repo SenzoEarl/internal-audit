@@ -1,0 +1,63 @@
+{% extends 'assets/base.html' %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block content %}
+    <div class="text-center mt-5">
+        <h1>Welcome to Lethu Internal</h1>
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                {% if user.is_authenticated %}
+                    <div class="card p-4">
+                        <h2 class="h5">Hello, {{ user.get_username }}</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.
+                            Sed cursus ante dapibus diam.
+                            Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris.
+                            Fusce nec tellus sed augue semper porta.
+                        </p>
+                        <p>
+                            Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Curabitur
+                            suscipit suscipit tellus.
+                        </p>
+                    </div>
+                {% else %}
+                    <p class="lead">Please log in to continue</p>
+
+                    {% if messages %}
+                        <div>
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form id="login-form" method="post" action="{% url 'audit:login-ajax' %}" data-app-form="login">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="id_username" name="username"
+                                   autocomplete="username"/>
+                            <div class="invalid-feedback" data-field-error="username"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="id_password" name="password"
+                                   autocomplete="current-password"/>
+                            <div class="invalid-feedback" data-field-error="password"></div>
+                        </div>
+                        <div class="mb-3 text-danger" data-field-error="__all__"></div>
+
+                        <button type="submit" class="btn btn-primary" id="login-submit" data-app-action="login-submit">
+                            Login
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

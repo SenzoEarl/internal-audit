@@ -1,0 +1,88 @@
+{% extends 'assets/base.html' %}
+
+{% block title %}
+	    Clients Dashboard
+{% endblock %}
+
+{% block extra_head %}
+<!-- Ensure bootstrap modal styles available (already included) -->
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Clients Dashboard</h1>
+
+    {% if clients %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="clients-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Projects</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr data-client-id="{{ client.id }}">
+                            <td class="client-name">{{ client.name }}</td>
+                            <td>{{ client.project_set.count }}</td>
+                            <td>
+                                <!-- View/Edit button opens modal -->
+                                <button class="btn btn-sm btn-outline-primary" data-app-action="client-view" data-client-id="{{ client.id }}">View / Edit</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No clients found.</p>
+    {% endif %}
+
+    <!-- Client modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="clientModalLabel">Client</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="client-modal-form" data-client-id="" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" class="form-control" name="contact_name" />
+                    <div class="invalid-feedback" data-field-error="contact_name"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" class="form-control" name="contact_email" />
+                    <div class="invalid-feedback" data-field-error="contact_email"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Phone</label>
+                    <input type="text" class="form-control" name="contact_phone" />
+                    <div class="invalid-feedback" data-field-error="contact_phone"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-control" name="address" rows="3"></textarea>
+                    <div class="invalid-feedback" data-field-error="address"></div>
+                </div>
+                <div class="mb-3 text-danger" data-field-error="__all__"></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-app-action="client-save">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
