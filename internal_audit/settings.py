@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ey8)ygkp6@czk1ytmh$!vr-*ynm6enf^4ee@9sb#t*i+ct^tcy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
@@ -116,7 +116,8 @@ LOGIN_REDIRECT_URL = 'audit:dashboard'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'staticfiles'
+    BASE_DIR / 'staticfiles',
+    BASE_DIR / 'static',
 ]
 
 # Session timeout: 10 minutes (600 seconds) of inactivity

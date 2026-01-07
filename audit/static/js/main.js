@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Framework-safe JavaScript
  * - No globals
@@ -14,17 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
     initApp(appRoot);
 });
 
-function initApp(root) {
+const initApp = (root) => {
     // Bind actions globally so elements outside the .app container (e.g. navbar) are handled
     bindActions(document);
     bindForms(root);
     bindActivityListeners();
-}
+};
 
 /**
  * Bind actions using data attributes
  */
-function bindActions(root) {
+const bindActions = (root) => {
     const triggers = root.querySelectorAll("[data-app-action]");
 
     triggers.forEach((el) => {
@@ -35,12 +33,12 @@ function bindActions(root) {
             handleAction(action, el);
         });
     });
-}
+};
 
 /**
  * Bind forms marked with data-app-form
  */
-function bindForms(root) {
+const bindForms = (root) => {
     const forms = root.querySelectorAll("[data-app-form]");
     forms.forEach((form) => {
         // Prevent multiple bindings
@@ -53,12 +51,12 @@ function bindForms(root) {
             handleFormSubmit(name, form);
         });
     });
-}
+};
 
 /**
  * Centralized action handler
  */
-function handleAction(action, element) {
+const handleAction = (action, element) => {
     switch (action) {
         case "toggle":
             toggleTarget(element);
@@ -84,12 +82,12 @@ function handleAction(action, element) {
         default:
             console.warn(`Unknown app action: ${action}`);
     }
-}
+};
 
 /**
  * Handle form submission for named forms
  */
-function handleFormSubmit(name, form) {
+const handleFormSubmit = (name, form) => {
     switch (name) {
         case "login":
             submitLoginForm(form);
@@ -97,12 +95,12 @@ function handleFormSubmit(name, form) {
         default:
             console.warn(`Unknown form submit: ${name}`);
     }
-}
+};
 
 /**
  * Submit login form via fetch as JSON. Uses CSRF token from the form input named 'csrfmiddlewaretoken'.
  */
-async function submitLoginForm(form) {
+const submitLoginForm = async (form) => {
     clearFormErrors(form);
 
     const usernameEl = form.querySelector('[name="username"]');
@@ -140,7 +138,7 @@ async function submitLoginForm(form) {
             headers: {
                 'Content-Type': 'application/json',
                 // Include CSRF token header if available
-                ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+                ...(csrfToken && { 'X-CSRFToken': csrfToken }),
             },
             credentials: 'same-origin',
             body: JSON.stringify({ username, password }),
@@ -150,9 +148,9 @@ async function submitLoginForm(form) {
 
         if (!resp.ok) {
             // Expecting {success: False, errors: {...}}
-            if (data && data.errors) {
+            if (data?.errors) {
                 showFormErrors(form, data.errors);
-            } else if (data && data.detail) {
+            } else if (data?.detail) {
                 showFormErrors(form, { '__all__': data.detail });
             } else {
                 showFormErrors(form, { '__all__': 'An unexpected error occurred. Please try again.' });
@@ -161,7 +159,7 @@ async function submitLoginForm(form) {
         }
 
         // Success: {success: True, redirect: "...}
-        if (data && data.success) {
+        if (data?.success) {
             window.location.href = (data.redirect || '/');
             return;
         }
@@ -174,30 +172,31 @@ async function submitLoginForm(form) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            if (submitBtn.dataset.prevText) submitBtn.textContent = submitBtn.dataset.prevText;
+            if (submitBtn.dataset.prevText) {
+                submitBtn.textContent = submitBtn.dataset.prevText;
+            }
             delete submitBtn.dataset.prevText;
         }
     }
-}
+};
 
 /**
  * Parse JSON safely from a Response object.
  */
-async function parseJsonSafe(resp) {
+const parseJsonSafe = async (resp) => {
     try {
         return await resp.json();
     } catch (e) {
         return null;
     }
-}
+};
 
 /**
  * Show form-level and field-level errors. Expects errors object with keys matching field names or '__all__'.
  */
-function showFormErrors(form, errors) {
+const showFormErrors = (form, errors) => {
     // Field-specific
-    Object.keys(errors).forEach((key) => {
-        const message = errors[key];
+    Object.entries(errors).forEach(([key, message]) => {
         if (key === '__all__') {
             const el = form.querySelector('[data-field-error="__all__"]');
             if (el) el.textContent = message;
@@ -208,25 +207,25 @@ function showFormErrors(form, errors) {
             if (feedback) feedback.textContent = message;
         }
     });
-}
+};
 
 /**
  * Clear existing form errors
  */
-function clearFormErrors(form) {
+const clearFormErrors = (form) => {
     // Clear invalid class
     const invalids = form.querySelectorAll('.is-invalid');
     invalids.forEach((el) => el.classList.remove('is-invalid'));
 
     // Clear feedback text
     const feedbacks = form.querySelectorAll('[data-field-error]');
-    feedbacks.forEach((el) => (el.textContent = ''));
-}
+    feedbacks.forEach((el) => el.textContent = '');
+};
 
 /**
  * Example behavior
  */
-function toggleTarget(trigger) {
+const toggleTarget = (trigger) => {
     const targetId = trigger.dataset.appTarget;
     if (!targetId) return;
 
@@ -234,30 +233,30 @@ function toggleTarget(trigger) {
     if (!target) return;
 
     target.classList.toggle("app--hidden");
-}
+};
 
 // Add logout handling and inactivity timer
 const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 let __inactivityTimer = null;
 
-async function triggerLogout() {
+const triggerLogout = async () => {
     // Find CSRF token in the page (from any form that includes csrfmiddlewaretoken)
     const csrfInput = document.querySelector('[name="csrfmiddlewaretoken"]');
-    const csrfToken = csrfInput ? csrfInput.value : null;
+    const csrfToken = csrfInput?.value;
 
     try {
         const resp = await fetch('/logout-ajax/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+                ...(csrfToken && { 'X-CSRFToken': csrfToken }),
             },
             credentials: 'same-origin',
             body: JSON.stringify({}),
         });
         const data = await parseJsonSafe(resp);
         // On success redirect to root
-        if (resp.ok && data && data.success) {
+        if (resp.ok && data?.success) {
             window.location.href = data.redirect || '/';
             return;
         }
@@ -267,53 +266,55 @@ async function triggerLogout() {
         console.error('Logout failed', e);
         window.location.reload();
     }
-}
+};
 
-function startInactivityTimer() {
+const startInactivityTimer = () => {
     stopInactivityTimer();
     __inactivityTimer = setTimeout(() => {
         // Auto-logout on inactivity
         triggerLogout();
     }, INACTIVITY_TIMEOUT_MS);
-}
+};
 
-function stopInactivityTimer() {
+const stopInactivityTimer = () => {
     if (__inactivityTimer) {
         clearTimeout(__inactivityTimer);
         __inactivityTimer = null;
     }
-}
+};
 
-function resetInactivityTimer() {
+const resetInactivityTimer = () => {
     startInactivityTimer();
-}
+};
 
 // Hook activity events globally
-function bindActivityListeners() {
+const bindActivityListeners = () => {
     const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
     events.forEach((ev) => {
         window.addEventListener(ev, resetInactivityTimer, { passive: true });
     });
     // Start timer initially
     startInactivityTimer();
-}
+};
 
 // Helper to get CSRF token from DOM
-function getCSRFCookie() {
+const getCSRFCookie = () => {
     const el = document.querySelector('[name="csrfmiddlewaretoken"]');
-    return el ? el.value : null;
-}
+    return el?.value;
+};
 
 // Open client modal and load client data
-async function openClientModal(clientId) {
+const openClientModal = async (clientId) => {
     const modalEl = document.getElementById('clientModal');
     if (!modalEl) return;
     const form = document.getElementById('client-modal-form');
     clearFormErrors(form);
+    
     try {
         const resp = await fetch(`/clients/${clientId}/`, { credentials: 'same-origin' });
         if (!resp.ok) throw new Error('Failed to fetch client');
         const data = await resp.json();
+        
         // populate fields
         form.dataset.clientId = data.id;
         form.querySelector('[name="name"]').value = data.name || '';
@@ -321,6 +322,7 @@ async function openClientModal(clientId) {
         form.querySelector('[name="contact_email"]').value = data.contact_email || '';
         form.querySelector('[name="contact_phone"]').value = data.contact_phone || '';
         form.querySelector('[name="address"]').value = data.address || '';
+        
         // ensure any previous validation state is cleared
         clearFormErrors(form);
 
@@ -331,18 +333,20 @@ async function openClientModal(clientId) {
         console.error(e);
         alert('Could not load client details.');
     }
-}
+};
 
 // Save client from modal via AJAX
-async function saveClientFromModal() {
+const saveClientFromModal = async () => {
     const form = document.getElementById('client-modal-form');
     if (!form) return;
     clearFormErrors(form);
     const clientId = form.dataset.clientId;
+    
     if (!clientId) {
         showFormErrors(form, { '__all__': 'Missing client id' });
         return;
     }
+    
     const payload = {
         contact_name: form.querySelector('[name="contact_name"]').value.trim(),
         contact_email: form.querySelector('[name="contact_email"]').value.trim(),
@@ -352,6 +356,7 @@ async function saveClientFromModal() {
 
     const csrf = getCSRFCookie();
     const submitBtn = document.querySelector('#clientModal [data-app-action="client-save"]');
+    
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.prevText = submitBtn.textContent;
@@ -364,19 +369,22 @@ async function saveClientFromModal() {
             credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
-                ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+                ...(csrf && { 'X-CSRFToken': csrf }),
             },
             body: JSON.stringify(payload),
         });
+        
         const data = await parseJsonSafe(resp);
+        
         if (!resp.ok) {
-            if (data && data.errors) {
+            if (data?.errors) {
                 showFormErrors(form, data.errors);
             } else {
                 showFormErrors(form, { '__all__': 'Failed to save. Please try again.' });
             }
             return;
         }
+        
         // success: refresh the table row by fetching latest client data
         try {
             const refreshed = await fetch(`/clients/${clientId}/`, { credentials: 'same-origin' });
@@ -403,14 +411,16 @@ async function saveClientFromModal() {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            if (submitBtn.dataset.prevText) submitBtn.textContent = submitBtn.dataset.prevText;
+            if (submitBtn.dataset.prevText) {
+                submitBtn.textContent = submitBtn.dataset.prevText;
+            }
             delete submitBtn.dataset.prevText;
         }
     }
-}
+};
 
 // Report create flow: multi-step wizard modal
-async function openReportCreateFlow() {
+const openReportCreateFlow = async () => {
     try {
         const resp = await fetch('/reports/create/', { credentials: 'same-origin' });
         if (!resp.ok) throw new Error('Failed to fetch create metadata');
@@ -446,10 +456,8 @@ async function openReportCreateFlow() {
         const modalEl = document.getElementById('createReportModal');
 
         // Helper to render a single field based on metadata
-        function renderField(meta) {
-            const name = meta.name;
-            const type = meta.type || 'text';
-            const choices = meta.choices || null;
+        const renderField = (meta) => {
+            const { name, type = 'text', choices = null } = meta;
             const id = `create_${name}`;
             const row = document.createElement('div');
             row.className = 'mb-3';
@@ -485,7 +493,7 @@ async function openReportCreateFlow() {
             // default text
             row.innerHTML = `<label class="form-label" for="${id}">${labelText}</label><input type="text" class="form-control" id="${id}" name="${name}" /><div class="invalid-feedback" data-field-error="${name}"></div>`;
             return row;
-        }
+        };
 
         // Build three step containers
         const stepsContainer = modalEl.querySelector('#create-steps');
@@ -523,7 +531,7 @@ async function openReportCreateFlow() {
         const submitBtn = modalEl.querySelector('#create-submit');
         const errorArea = modalEl.querySelector('[data-field-error="__all__"]');
 
-        function showStep(index) {
+        const showStep = (index) => {
             // hide all, show index
             stepDefs.forEach((s, i) => {
                 const el = modalEl.querySelector(`#${s.id}`);
@@ -536,9 +544,9 @@ async function openReportCreateFlow() {
             submitBtn.classList.toggle('d-none', index !== totalSteps - 1);
             // clear generic errors
             if (errorArea) errorArea.textContent = '';
-        }
+        };
 
-        function collectPayload() {
+        const collectPayload = () => {
             const payload = {};
             // collect all inputs by name
             const inputs = modalEl.querySelectorAll('#create-steps [name]');
@@ -547,33 +555,32 @@ async function openReportCreateFlow() {
                 let val = inp.value;
                 // convert number inputs
                 if (inp.type === 'number') {
-                    if (val === '') val = null;
-                    else val = Number(val);
+                    val = val === '' ? null : Number(val);
                 }
                 payload[name] = val;
             });
             return payload;
-        }
+        };
 
-        function validateCurrentStep() {
+        const validateCurrentStep = () => {
             // basic validation for core required fields when on first step
             if (currentStep === 0) {
                 const missing = [];
                 requiredCore.forEach((fn) => {
                     const el = modalEl.querySelector(`[name="${fn}"]`);
                     if (el) {
-                        const v = el.value && el.value.toString().trim();
+                        const v = el.value?.toString().trim();
                         if (!v) missing.push(fn);
                     }
                 });
                 if (missing.length) {
-                    const m = 'Please fill required fields: ' + missing.join(', ').replace(/_/g, ' ');
+                    const m = `Please fill required fields: ${missing.join(', ').replace(/_/g, ' ')}`;
                     if (errorArea) errorArea.textContent = m;
                     return false;
                 }
             }
             return true;
-        }
+        };
 
         nextBtn.addEventListener('click', () => {
             if (!validateCurrentStep()) return;
@@ -595,29 +602,35 @@ async function openReportCreateFlow() {
             submitBtn.disabled = true;
             submitBtn.dataset.prevText = submitBtn.textContent;
             submitBtn.textContent = 'Creating...';
+            
             try {
                 const resp2 = await fetch('/reports/create/', {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+                        ...(csrf && { 'X-CSRFToken': csrf }),
                     },
                     body: JSON.stringify(payload),
                 });
+                
                 const data2 = await parseJsonSafe(resp2);
+                
                 if (!resp2.ok) {
                     const formArea = modalEl.querySelector('#create-steps');
-                    if (data2 && data2.errors) {
+                    if (data2?.errors) {
                         // map errors to fields
                         showFormErrors(formArea, data2.errors);
-                        if (data2.errors.__all__ && errorArea) errorArea.textContent = data2.errors.__all__;
+                        if (data2.errors.__all__ && errorArea) {
+                            errorArea.textContent = data2.errors.__all__;
+                        }
                     } else {
                         if (errorArea) errorArea.textContent = 'Failed to create report';
                     }
                     return;
                 }
-                if (data2 && data2.success && data2.id) {
+                
+                if (data2?.success && data2.id) {
                     // redirect to new report detail
                     window.location.href = `/reports/${data2.id}/`;
                 } else {
@@ -628,7 +641,9 @@ async function openReportCreateFlow() {
                 if (errorArea) errorArea.textContent = 'Network error while creating report';
             } finally {
                 submitBtn.disabled = false;
-                if (submitBtn.dataset.prevText) submitBtn.textContent = submitBtn.dataset.prevText;
+                if (submitBtn.dataset.prevText) {
+                    submitBtn.textContent = submitBtn.dataset.prevText;
+                }
                 delete submitBtn.dataset.prevText;
             }
         });
@@ -646,10 +661,10 @@ async function openReportCreateFlow() {
         console.error(e);
         alert('Could not start create flow');
     }
-}
+};
 
 // Share modal handling
-function openShareModal(auditId) {
+const openShareModal = (auditId) => {
     const modalEl = document.getElementById('shareModal');
     if (!modalEl) return;
     const form = document.getElementById('share-form');
@@ -660,4 +675,40 @@ function openShareModal(auditId) {
     const manualInput = modalEl.querySelector('#share-to');
     if (manualInput) manualInput.value = '';
     const messageArea = modalEl.querySelector('[name="message"]');
-    if
+    if (messageArea) messageArea.value = '';
+
+    // Show modal
+    const bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+};
+
+// Send share functionality (to be implemented)
+const sendShare = async () => {
+    // Implementation for sending share goes here
+    console.log('Send share functionality to be implemented');
+};
+
+// Export functions if needed for testing or modular use
+export {
+    initApp,
+    bindActions,
+    bindForms,
+    handleAction,
+    handleFormSubmit,
+    submitLoginForm,
+    parseJsonSafe,
+    showFormErrors,
+    clearFormErrors,
+    toggleTarget,
+    triggerLogout,
+    startInactivityTimer,
+    stopInactivityTimer,
+    resetInactivityTimer,
+    bindActivityListeners,
+    getCSRFCookie,
+    openClientModal,
+    saveClientFromModal,
+    openReportCreateFlow,
+    openShareModal,
+    sendShare
+};
