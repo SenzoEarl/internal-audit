@@ -1,0 +1,23 @@
+# File: `docker-compose.yml`
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: auditdb
+      POSTGRES_USER: audituser
+      POSTGRES_PASSWORD: auditpass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+volumes:
+  db_data:

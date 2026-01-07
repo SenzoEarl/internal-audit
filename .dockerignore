@@ -1,0 +1,12 @@
+# File: `.dockerignore`
+__pycache__
+*.py[cod]
+*.sqlite3
+.env
+venv
+env
+node_modules
+.git
+.gitignore
+*.log
+media
